@@ -501,6 +501,14 @@ TF_CAPI_EXPORT TF_Tensor* TF_AllocateOutput(TF_OpKernelContext* context,
                                             const int64_t* dims, int num_dims,
                                             size_t len, TF_Status* status);
 
+// Tries to forward the input with the give input_index to output index. Returns
+// true if forarding succeeds, false otherwise.
+TF_CAPI_EXPORT bool TF_ForwardInputToOutputWithShape(TF_OpKernelContext* context,
+                                      int input_index, int output_index,
+                                      const int64_t* output_dims,
+                                      int output_num_dims, TF_Tensor** output,
+                                      TF_Status* status);
+
 // Tries to forward one of the inputs given in input_indices to
 // output[output_index]. If none of the given inputs can be forwarded, calls
 // allocate_output() to allocate a new output buffer. The index of the

@@ -870,6 +870,28 @@ TF_Tensor* TF_AllocateOutput(TF_OpKernelContext* context, int index,
   return tf_tensor;
 }
 
+bool TF_ForwardInputToOutputWithShape(TF_OpKernelContext* context,
+                                      int input_index, int output_index,
+                                      const int64_t* output_dims,
+                                      int output_num_dims, TF_Tensor** output,
+                                      TF_Status* status) {
+  TF_SetStatus(status, TF_OK, "");
+  auto* cc_ctx = reinterpret_cast<::tensorflow::OpKernelContext*>(context);
+
+  tensorflow::gtl::ArraySlice<const int64_t> output_dimarray(
+      reinterpret_cast<const int64_t*>(output_dims), output_num_dims);
+  tensorflow::Tensor* output_tensor_pointer;
+  bool ret = cc_ctx->forward_input_to_output_with_shape(
+      input_index, output_index, tensorflow::TensorShape(output_dimarray),
+      &output_tensor_pointer);
+  absl::Status s;
+  if (ret) {
+    *output = TF_TensorFromTensor(*output_tensor_pointer, &s);
+  }
+  ::tensorflow::Set_TF_Status_from_Status(status, s);
+  return ret;
+}
+
 TF_Tensor* TF_ForwardInputOrAllocateOutput(
     TF_OpKernelContext* context, const int* candidate_input_indices,
     int num_candidate_input_indices, int output_index,
